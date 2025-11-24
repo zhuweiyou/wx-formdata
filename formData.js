@@ -57,7 +57,7 @@ function convert(data, files){
   }
   //结尾
   let endBoundaryArray = [];
-  endBoundaryArray.push(...endBoundary.toUtf8Bytes());
+  endBoundaryArray.push(...toUtf8Bytes(endBoundary));
   postArray = postArray.concat(endBoundaryArray);
   return {
     contentType: 'multipart/form-data; boundary=' + boundaryKey,
@@ -88,14 +88,14 @@ function formDataArray(boundary, name, value, fileName){
   }
 
   var dataArray = [];
-  dataArray.push(...dataString.toUtf8Bytes());
+  dataArray.push(...toUtf8Bytes(dataString));
 
   if (isFile) {
     let fileArray = new Uint8Array(value);
     dataArray = dataArray.concat(Array.prototype.slice.call(fileArray));
   }
-  dataArray.push(..."\r".toUtf8Bytes());
-  dataArray.push(..."\n".toUtf8Bytes());
+  dataArray.push(...toUtf8Bytes("\r"));
+  dataArray.push(...toUtf8Bytes("\n"));
 
   return dataArray;
 }
@@ -106,11 +106,10 @@ function getFileMime(fileName){
   return mime?mime:"application/octet-stream"
 }
 
-String.prototype.toUtf8Bytes = function(){
-  var str = this;
+function toUtf8Bytes(str) {
   var bytes = [];
   for (var i = 0; i < str.length; i++) {
-    bytes.push(...str.utf8CodeAt(i));
+    bytes.push(...utf8CodeAt(str, i));
     if (str.codePointAt(i) > 0xffff) {
       i++;
     }
@@ -118,8 +117,7 @@ String.prototype.toUtf8Bytes = function(){
   return bytes;
 }
 
-String.prototype.utf8CodeAt = function(i) {
-  var str = this;
+function utf8CodeAt(str, i) {
   var out = [], p = 0;
   var c = str.charCodeAt(i);
   if (c < 128) {
@@ -142,7 +140,7 @@ String.prototype.utf8CodeAt = function(i) {
     out[p++] = (c & 63) | 128;
   }
   return out;
-};
+}
 
 
 module.exports = FormData;
